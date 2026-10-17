@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulador BHA 3D - Ensamblaje de Fondo de Pozo | Digital Twin</title>
+  <meta name="description" content="Visualizador 3D interactivo en Three.js de un ensamblaje de fondo de pozo (Bottom Hole Assembly - BHA) con fichas técnicas de ingeniería petrolera, vista explosionada y simulación hidromecánica.">
+  
+  <!-- Tipografías de Google Fonts: Outfit (modern sans) y JetBrains Mono (código e ingeniería) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Carga local de Three.js y OrbitControls para máxima estabilidad y soporte sin conexión -->
+  <script src="js/lib/three.min.js"></script>
+  <script src="js/lib/OrbitControls.js"></script>
+
+  <link rel="icon" type="image/svg+xml" href="spinosaurus-logo.svg">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Contenedor 3D Three.js -->
+  <div id="webgl-container"></div>
+  <div class="ambient-backdrop"></div>
+
+  <!-- HEADER PRINCIPAL -->
+  <header class="app-header">
+    <div class="brand-section">
+      <div class="brand-logo-icon" title="Logo Espinosaurio" aria-label="Logo Espinosaurio">
+        <svg viewBox="0 0 367 268" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M 154.0,10.0 L 162.0,70.0 L 163.0,56.0 L 160.0,10.0 L 169.0,15.0 L 177.0,14.0 L 177.0,65.0 L 179.0,65.0 L 182.0,17.0 L 188.0,25.0 L 195.0,27.0 L 192.0,67.0 L 194.0,67.0 L 200.0,33.0 L 202.0,40.0 L 210.0,48.0 L 206.0,68.0 L 207.0,73.0 L 213.0,55.0 L 218.0,71.0 L 225.0,77.0 L 231.0,76.0 L 240.0,65.0 L 242.0,59.0 L 240.0,53.0 L 245.0,47.0 L 243.0,42.0 L 251.0,37.0 L 249.0,32.0 L 257.0,30.0 L 259.0,28.0 L 258.0,25.0 L 268.0,25.0 L 270.0,23.0 L 269.0,21.0 L 289.0,25.0 L 286.0,27.0 L 287.0,28.0 L 297.0,25.0 L 309.0,34.0 L 325.0,40.0 L 327.0,40.0 L 327.0,38.0 L 306.0,27.0 L 310.0,24.0 L 313.0,25.0 L 323.0,34.0 L 353.0,43.0 L 357.0,49.0 L 357.0,55.0 L 352.0,59.0 L 351.0,55.0 L 347.0,58.0 L 347.0,55.0 L 345.0,54.0 L 342.0,59.0 L 342.0,56.0 L 339.0,55.0 L 335.0,60.0 L 335.0,56.0 L 329.0,58.0 L 329.0,54.0 L 315.0,49.0 L 302.0,49.0 L 286.0,52.0 L 289.0,54.0 L 304.0,54.0 L 336.0,68.0 L 339.0,65.0 L 341.0,68.0 L 344.0,64.0 L 344.0,67.0 L 346.0,68.0 L 348.0,65.0 L 350.0,69.0 L 348.0,74.0 L 344.0,76.0 L 337.0,76.0 L 317.0,70.0 L 287.0,68.0 L 280.0,64.0 L 274.0,58.0 L 272.0,53.0 L 270.0,53.0 L 273.0,62.0 L 279.0,69.0 L 287.0,73.0 L 298.0,74.0 L 284.0,78.0 L 274.0,86.0 L 264.0,109.0 L 245.0,130.0 L 246.0,132.0 L 251.0,128.0 L 251.0,134.0 L 244.0,147.0 L 242.0,156.0 L 238.0,159.0 L 244.0,162.0 L 261.0,179.0 L 263.0,183.0 L 267.0,197.0 L 265.0,207.0 L 260.0,212.0 L 250.0,213.0 L 254.0,212.0 L 258.0,208.0 L 257.0,205.0 L 261.0,201.0 L 261.0,194.0 L 259.0,194.0 L 259.0,198.0 L 254.0,204.0 L 247.0,204.0 L 244.0,200.0 L 249.0,202.0 L 255.0,195.0 L 252.0,189.0 L 252.0,182.0 L 249.0,179.0 L 236.0,174.0 L 226.0,165.0 L 225.0,158.0 L 229.0,156.0 L 239.0,145.0 L 238.0,144.0 L 231.0,150.0 L 219.0,156.0 L 214.0,158.0 L 210.0,157.0 L 228.0,135.0 L 229.0,125.0 L 227.0,121.0 L 222.0,137.0 L 214.0,143.0 L 206.0,155.0 L 199.0,156.0 L 209.0,163.0 L 216.0,175.0 L 225.0,183.0 L 230.0,193.0 L 238.0,202.0 L 238.0,210.0 L 234.0,216.0 L 235.0,209.0 L 230.0,200.0 L 227.0,200.0 L 229.0,213.0 L 226.0,218.0 L 220.0,222.0 L 216.0,222.0 L 222.0,216.0 L 222.0,202.0 L 219.0,202.0 L 217.0,210.0 L 214.0,212.0 L 207.0,212.0 L 204.0,209.0 L 204.0,206.0 L 209.0,209.0 L 214.0,203.0 L 212.0,192.0 L 213.0,186.0 L 196.0,174.0 L 187.0,162.0 L 193.0,141.0 L 200.0,131.0 L 198.0,130.0 L 195.0,132.0 L 186.0,145.0 L 181.0,160.0 L 183.0,166.0 L 157.0,176.0 L 144.0,177.0 L 150.0,158.0 L 156.0,154.0 L 177.0,149.0 L 161.0,148.0 L 150.0,152.0 L 151.0,140.0 L 147.0,122.0 L 145.0,153.0 L 135.0,185.0 L 124.0,198.0 L 107.0,209.0 L 101.0,215.0 L 97.0,224.0 L 97.0,234.0 L 101.0,246.0 L 109.0,252.0 L 115.0,252.0 L 114.0,254.0 L 121.0,258.0 L 107.0,258.0 L 105.0,253.0 L 97.0,248.0 L 93.0,236.0 L 93.0,248.0 L 95.0,252.0 L 99.0,254.0 L 98.0,258.0 L 87.0,258.0 L 85.0,239.0 L 82.0,251.0 L 83.0,255.0 L 80.0,254.0 L 78.0,258.0 L 73.0,258.0 L 76.0,253.0 L 79.0,238.0 L 79.0,215.0 L 89.0,203.0 L 95.0,185.0 L 105.0,177.0 L 108.0,181.0 L 109.0,180.0 L 97.0,149.0 L 96.0,136.0 L 95.0,135.0 L 93.0,138.0 L 93.0,150.0 L 97.0,163.0 L 86.0,160.0 L 66.0,160.0 L 53.0,163.0 L 36.0,172.0 L 27.0,185.0 L 26.0,197.0 L 32.0,209.0 L 33.0,207.0 L 30.0,201.0 L 30.0,190.0 L 35.0,179.0 L 41.0,174.0 L 37.0,182.0 L 39.0,194.0 L 46.0,203.0 L 56.0,210.0 L 74.0,216.0 L 74.0,230.0 L 63.0,229.0 L 46.0,224.0 L 27.0,213.0 L 17.0,202.0 L 13.0,194.0 L 10.0,183.0 L 11.0,167.0 L 17.0,153.0 L 31.0,137.0 L 43.0,128.0 L 72.0,112.0 L 80.0,104.0 L 83.0,98.0 L 89.0,101.0 L 91.0,100.0 L 85.0,94.0 L 90.0,87.0 L 91.0,79.0 L 102.0,91.0 L 103.0,90.0 L 93.0,73.0 L 99.0,64.0 L 100.0,55.0 L 114.0,81.0 L 116.0,81.0 L 102.0,49.0 L 111.0,42.0 L 114.0,34.0 L 129.0,74.0 L 131.0,77.0 L 132.0,76.0 L 119.0,35.0 L 118.0,27.0 L 125.0,26.0 L 132.0,18.0 L 133.0,19.0 L 145.0,70.0 L 147.0,70.0 L 137.0,14.0 L 147.0,15.0 L 154.0,10.0 Z M 274.0,29.0 L 275.0,30.0 L 267.0,33.0 L 257.0,41.0 L 252.0,48.0 L 246.0,63.0 L 249.0,50.0 L 254.0,40.0 L 263.0,32.0 L 274.0,29.0 Z M 296.0,31.0 L 300.0,32.0 L 303.0,35.0 L 297.0,36.0 L 294.0,33.0 L 296.0,31.0 Z M 346.0,45.0 L 348.0,45.0 L 350.0,48.0 L 346.0,45.0 Z M 270.0,70.0 L 274.0,72.0 L 270.0,73.0 L 264.0,79.0 L 256.0,96.0 L 250.0,103.0 L 256.0,92.0 L 260.0,80.0 L 270.0,70.0 Z M 176.0,78.0 L 197.0,79.0 L 214.0,83.0 L 227.0,83.0 L 234.0,79.0 L 229.0,84.0 L 223.0,87.0 L 206.0,89.0 L 189.0,88.0 L 203.0,87.0 L 206.0,85.0 L 191.0,82.0 L 174.0,82.0 L 148.0,87.0 L 131.0,94.0 L 138.0,98.0 L 123.0,97.0 L 110.0,103.0 L 103.0,108.0 L 89.0,123.0 L 94.0,114.0 L 92.0,113.0 L 61.0,126.0 L 42.0,136.0 L 57.0,126.0 L 97.0,107.0 L 110.0,98.0 L 124.0,91.0 L 150.0,82.0 L 176.0,78.0 Z" fill="currentColor"/>
+        </svg>
+      </div>
+      <div class="brand-titles">
+        <h1>Ensamblaje de Fondo (BHA) 3D</h1>
+        <div class="brand-sub">
+          <span>POZO ANT-104</span>
+          <span>•</span>
+          <span class="badge-live"><span class="pulse-dot"></span> TELEMETRÍA ACTIVA</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="header-meta">
+      <div class="rig-stat">
+        <span class="stat-label">Profundidad Actual</span>
+        <span class="stat-val" id="hud-depth">2,820.0 m MD</span>
+      </div>
+      <div class="rig-stat">
+        <span class="stat-label">Calibre de Pozo</span>
+        <span class="stat-val">8 ½ in (215.9 mm)</span>
+      </div>
+
+      <button class="btn-icon" id="btn-fullscreen" title="Pantalla Completa" aria-label="Pantalla Completa">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- NAVEGADOR LATERAL DE COMPONENTES (BHA SEQUENCE) -->
+  <aside class="bha-navigator" id="bha-navigator">
+    <div class="nav-header">
+      <h2>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="8" y1="6" x2="21" y2="6"></line>
+          <line x1="8" y1="12" x2="21" y2="12"></line>
+          <line x1="8" y1="18" x2="21" y2="18"></line>
+          <line x1="3" y1="6" x2="3.01" y2="6"></line>
+          <line x1="3" y1="12" x2="3.01" y2="12"></line>
+          <line x1="3" y1="18" x2="3.01" y2="18"></line>
+        </svg>
+        Sarta del BHA
+      </h2>
+      <span class="count-pill">10 Herramientas</span>
+    </div>
+    <div class="bha-list" id="bha-list-container">
+      <!-- Los elementos de la lista se inyectan dinámicamente con JS -->
+    </div>
+  </aside>
+
+  <!-- COTA DE PROFUNDIDAD VERTICAL (DEPTH RULER) -->
+  <div class="depth-ruler" id="depth-ruler">
+    <div class="depth-mark"><span>-32 m</span></div>
+    <div class="depth-mark"><span>-24 m</span></div>
+    <div class="depth-mark"><span>-16 m</span></div>
+    <div class="depth-mark"><span>-8 m</span></div>
+    <div class="depth-mark" style="color:var(--cyan-primary);"><span>0 m (Bit)</span></div>
+  </div>
+
+  <!-- PANEL HUD LATERAL (DATOS DE FORMACIÓN Y POZO) -->
+  <div class="wellbore-hud" id="wellbore-hud">
+    <div class="hud-title">
+      <span>Condiciones de Pozo</span>
+      <span style="color:var(--emerald-active);">● NOMINAL</span>
+    </div>
+    <div class="hud-row">
+      <span class="hud-key">Litología:</span>
+      <span class="hud-val">Arenisca / Lutita</span>
+    </div>
+    <div class="hud-row">
+      <span class="hud-key">Presión Poro:</span>
+      <span class="hud-val">4,850 PSI</span>
+    </div>
+    <div class="hud-row">
+      <span class="hud-key">Temp. Fondo:</span>
+      <span class="hud-val" id="hud-temp">118 °C</span>
+    </div>
+    <div class="hud-row">
+      <span class="hud-key">Lodo:</span>
+      <span class="hud-val">OBM 12.4 PPG</span>
+    </div>
+    <div class="hud-row">
+      <span class="hud-key">Caudal Bombas:</span>
+      <span class="hud-val" id="hud-flow">550 GPM</span>
+    </div>
+  </div>
+
+  <!-- GUÍA DE CONTROLES DE CÁMARA -->
+  <div class="camera-helper">
+    <span><kbd>Clic Izq</kbd> Rotar</span>
+    <span>•</span>
+    <span><kbd>Rueda</kbd> Zoom</span>
+    <span>•</span>
+    <span><kbd>Clic Der</kbd> Desplazar</span>
+    <span>•</span>
+    <span><kbd>Clic en Pieza</kbd> Inspeccionar</span>
+  </div>
+
+  <!-- BARRA DE HERRAMIENTAS INFERIOR FLOTANTE -->
+  <nav class="toolbar-container">
+    <button class="tool-btn" id="btn-reset-view" title="Enfocar ensamblaje completo">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+        <path d="M3 3v5h5"></path>
+      </svg>
+      Vista General
+    </button>
+
+    <button class="tool-btn" id="btn-toggle-explode" title="Separar los componentes para ver las roscas y uniones API">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <polyline points="19 12 12 19 5 12"></polyline>
+      </svg>
+      Vista Explosionada
+    </button>
+
+    <div class="tool-separator"></div>
+
+    <button class="tool-btn" id="btn-toggle-rotate" title="Iniciar rotación de la sarta de perforación">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+      </svg>
+      Rotar Sarta
+    </button>
+
+    <div class="rpm-control" title="Ajustar revoluciones por minuto">
+      <input type="range" id="rpm-slider" min="10" max="150" value="60" step="5">
+      <span class="rpm-val" id="rpm-display">60 RPM</span>
+    </div>
+
+    <div class="tool-separator"></div>
+
+    <button class="tool-btn active" id="btn-toggle-mud" title="Activar simulación de partículas de lodo">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+      </svg>
+      Flujo Lodo
+    </button>
+
+    <button class="tool-btn" id="btn-toggle-wellbore" title="Alternar visualización de paredes de roca del pozo">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+        <line x1="3" y1="9" x2="21" y2="9"></line>
+        <line x1="9" y1="21" x2="9" y2="9"></line>
+      </svg>
+      Ver Pozo
+    </button>
+  </nav>
+
+  <!-- PANEL DE FICHA TÉCNICA INFORMATIVA (DRAWER DERECHO) -->
+  <article class="spec-panel" id="spec-panel" aria-label="Ficha Técnica del Componente">
+    <div class="spec-header">
+      <div class="spec-badge-row">
+        <span class="category-tag" id="spec-cat-badge">Herramienta de Corte</span>
+        <span class="order-tag" id="spec-order-badge">Posición 1 / 10 (Fondo)</span>
+      </div>
+      <div class="spec-title-row">
+        <div>
+          <h2 class="spec-title" id="spec-title">Barrena PDC 8 ½"</h2>
+          <div class="spec-type" id="spec-type">PDC Matrix Body</div>
+        </div>
+        <button class="btn-close-spec" id="btn-close-spec" title="Cerrar Ficha Técnica" aria-label="Cerrar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Pestañas de Navegación de la Ficha -->
+    <div class="spec-tabs">
+      <button class="tab-btn active" data-tab="tab-specs">Especificaciones</button>
+      <button class="tab-btn" data-tab="tab-oper">Parámetros</button>
+      <button class="tab-btn" data-tab="tab-func">Función & Principio</button>
+      <button class="tab-btn" data-tab="tab-telem">Telemetría</button>
+    </div>
+
+    <!-- Contenedor con Scroll de la Ficha -->
+    <div class="spec-content">
+      <!-- Pestaña 1: Especificaciones Mecánicas -->
+      <div class="tab-pane active" id="tab-specs">
+        <div class="spec-summary-card" id="spec-summary">
+          Elemento primario de corte que destruye la roca por cizallamiento mediante cortadores de diamante sintético.
+        </div>
+        <div class="section-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+            <line x1="8" y1="21" x2="16" y2="21"></line>
+            <line x1="12" y1="17" x2="12" y2="21"></line>
+          </svg>
+          Dimensiones y Conexiones API
+        </div>
+        <table class="spec-table">
+          <tbody id="spec-table-body">
+            <!-- Filas inyectadas con JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pestaña 2: Parámetros Operativos -->
+      <div class="tab-pane" id="tab-oper">
+        <div class="section-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          Límites y Rangos en Pozo
+        </div>
+        <table class="spec-table">
+          <tbody id="oper-table-body">
+            <!-- Filas inyectadas con JS -->
+          </tbody>
+        </table>
+        <div class="section-label" style="margin-top: 8px;">
+          Recomendaciones de Campo
+        </div>
+        <ul class="recommendation-list" id="recommendations-list">
+          <!-- Items inyectados con JS -->
+        </ul>
+      </div>
+
+      <!-- Pestaña 3: Función y Principio Físico -->
+      <div class="tab-pane" id="tab-func">
+        <div class="section-label">
+          Rol en la Dinámica del Pozo
+        </div>
+        <div class="spec-summary-card" id="spec-full-desc" style="white-space: pre-line;">
+          <!-- Texto completo inyectado con JS -->
+        </div>
+      </div>
+
+      <!-- Pestaña 4: Telemetría en Tiempo Real -->
+      <div class="tab-pane" id="tab-telem">
+        <div class="section-label">
+          Monitoreo de Sensores de Fondo
+        </div>
+        <div class="telemetry-grid" id="telemetry-grid-container">
+          <!-- Tarjetas de telemetría inyectadas con JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Pie de la Ficha Técnica -->
+    <div class="spec-footer">
+      <button class="btn-action-primary" id="btn-focus-component">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <circle cx="12" cy="12" r="3"></circle>
+        </svg>
+        Centrar Cámara 3D
+      </button>
+    </div>
+  </article>
+
+  <!-- TOOLTIP FLOTANTE AL PASAR EL RATÓN -->
+  <div class="floating-tooltip" id="floating-tooltip">
+    <span class="tooltip-title" id="tooltip-title">Herramienta</span>
+    <span class="tooltip-sub" id="tooltip-sub">Hacer clic para ver ficha</span>
+  </div>
+
+  <!-- Scripts principales como Módulos ES -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
